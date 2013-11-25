@@ -12,7 +12,7 @@ AppleScript:
 
 Shell:
 ========
-	runn apple script with 
+	run apple script with 
 		osascript Calca.scpt (r|w) data
 
 		osascript Calca.scpt w '2+2=>'
