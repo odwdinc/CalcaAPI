@@ -1,0 +1,121 @@
+on enabledGUIScripting(flag)
+	get system attribute "sysv"
+	if result is less than 4240 then -- 4240 is OS X 10.9.0 Mavericks
+		
+		-- In OS X 10.8 Mountain Lion and older, enable GUI Scripting globally by calling this handler and passing 'true' in the flag parameter before your script executes any GUI Scripting commands, or pass 'false' to disable GUI Scripting. Authentication is required only if the value of the 'UI elements enabled' property will be changed. Returns the final setting of 'UI elements enabled' even if unchanged.
+		
+		tell application "System Events"
+			activate -- brings System Events authentication dialog to front
+			set UI elements enabled to flag
+			return UI elements enabled
+		end tell
+	else
+		
+		-- In OS X 10.9 Mavericks, global access is no longer available and GUI Scripting can only be enabled manually on a per-application basis. Pass true to present an alert with a button to open System Preferences and telling the user to select the current application (the application running the script) in the Accessibility list in the Security & Privacy preference's Privacy pane. Authentication is required to unlock the preference. Returns the current setting of 'UI elements enabled' asynchronously, without waiting for System Preferences to open, and tells the user to run the script again.
+		
+		tell application "System Events" to set GUIScriptingEnabled to UI elements enabled -- read-only in OS X 10.9 Mavericks
+		if flag is true then
+			if not GUIScriptingEnabled then
+				activate
+				set scriptRunner to name of current application
+				display alert "GUI Scripting is not enabled for " & scriptRunner & "." message "Open System Preferences, unlock the Security & Privacy preference, select " & scriptRunner & " in the Privacy Pane's Accessibility list, and then run this script again." buttons {"Open System Preferences", "Cancel"} default button "Cancel"
+				if button returned of result is "Open System Preferences" then
+					tell application "System Preferences"
+						tell pane id "com.apple.preference.security" to reveal anchor "Privacy_Accessibility"
+						activate
+					end tell
+				end if
+			end if
+		end if
+		return GUIScriptingEnabled
+	end if
+end enabledGUIScripting
+
+
+on run argv
+	if (count of argv) is 2 then
+		return Calca(item 1 of argv, item 2 of argv)
+	else
+		return "osascript Calca.scpt (r|w) data | " & Calca("r", "")
+		
+	end if
+end run
+
+-- Use this script as a wrapper for GUI Scripting statements when you want the script to run without error on any version of Mac OS X. It presents an alert telling the user that GUI Scripting is not available or, if it is available but not enabled, how to enable it.
+-- For a handler that enables GUI Scripting with minimal user intervention on all recent versions of OS X, use UI Browser's Handler to Enable GUI Scripting. That handler still requires opening System Preferences on OS X Mavericks or newer, where global access can no longer be enabled programmatically.
+on Calca(mode, dat)
+	set page to ""
+	
+	set windowName to "Untitled"
+	
+	set sysVersion to system attribute "sysv"
+	if sysVersion is greater than or equal to 4144 then -- 4144 is Mac OS X 10.3.0 Panther
+		
+		tell application "System Events"
+			set cnt to count (every process whose name is "Calca")
+		end tell
+		
+		if cnt is 0 then
+			activate application "Calca"
+		end if
+		
+		tell application "Finder"
+			set visible of process "Calca" to false
+		end tell
+		
+		tell application "System Events"
+			
+			
+			set GUIScriptingEnabled to UI elements enabled
+			if GUIScriptingEnabled then
+				tell application process "Calca"
+					
+					-- insert GUI Scripting statements here
+					if window windowName exists then
+						
+					else
+						click menu item "New" of menu 1 of menu bar item "File" of menu bar 1
+					end if
+					
+					repeat until exists window windowName
+						delay 0.2
+					end repeat
+					
+					if mode is "w" then
+						set value of text area 1 of scroll area 1 of window windowName to dat
+					end if
+					
+					set page to get value of text area 1 of scroll area 1 of window windowName
+					
+				end tell
+			end if
+		end tell
+		if not GUIScriptingEnabled then
+			beep
+			if sysVersion is less than 4240 then -- 4240 is OS X 10.9.0 Mavericks
+				activate
+				display dialog "GUI Scripting is not enabled" & return & return & "Select the \"Enable access for assistive devices\" setting in Accessibility (or Universal Access) preferences and run this script again." buttons {"Open System Preferences", "Cancel"} default button "Cancel"
+				if button returned of result is "Open System Preferences" then
+					tell application "System Preferences"
+						set current pane to pane "com.apple.preference.universalaccess"
+						activate
+					end tell
+				end if
+			else
+				set scriptRunner to name of current application
+				activate
+				display alert "GUI Scripting is not enabled for " & scriptRunner & "." message "Open System Preferences, unlock the Security & Privacy preference, select " & scriptRunner & " in the Privacy Pane's Accessibility list, and then run this script again." buttons {"Open System Preferences", "Cancel"} default button "Cancel"
+				if button returned of result is "Open System Preferences" then
+					tell application "System Preferences"
+						tell pane id "com.apple.preference.security" to reveal anchor "Privacy_Accessibility"
+						activate
+					end tell
+				end if
+			end if
+		end if
+	else
+		beep
+		display dialog "This computer cannot run this script" & return & return & "The script uses GUI Scripting technology, which requires an upgrade to Mac OS X 10.3 Panther or newer." with icon caution buttons {"Quit"} default button "Quit"
+	end if
+	return page
+end Calca
