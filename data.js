@@ -14,11 +14,16 @@ module.exports = {
 	                    st:text.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp")
 	                },
 	                  function(data,status){
-	                    $("#tx1").val(data);
+	                  	var start = this.selectionStart;
+	                    $("#tx1").val($.trim(data));
+	                    this.selectionStart = this.selectionEnd = start;
 	                  });
 	          };
 
 	            $(document).ready(function(){
+	            	var syincfn = function () {
+    					syinc("w");
+					};	
 	              $("textarea").keydown(function(e) {
 	                  if(e.keyCode === 9) { // tab was pressed
 	                      // get caret position/selection
@@ -41,9 +46,7 @@ module.exports = {
 	                  }
 	              })
 	           
-	              $("button").click(function(){
-	                  syinc("w");
-	              });
+	              $("button").click(syincfn);
 
 	              syinc("r");
 	            });

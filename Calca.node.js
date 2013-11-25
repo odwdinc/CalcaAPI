@@ -19,10 +19,11 @@ function run_cmd(cmd, args, callBack ) {
 
 var server = http.createServer(function (req, resp) {
   var url_parts = url.parse(req.url, true);
-  
+    
 	
 
     if(url_parts.pathname === '/CalcaAPI.html'){
+      
       req.content = ''
       req.addListener("data", function(chunk) {
         req.content += chunk;
@@ -39,6 +40,7 @@ var server = http.createServer(function (req, resp) {
         });
 
         if ((data['m'] != undefined) && (data['st'] != undefined) ){
+
           run_cmd( "osascript", ["./Calca.scpt", data['m'] , data['st']], 
             function(text) { 
               resp.write(text);
@@ -49,9 +51,15 @@ var server = http.createServer(function (req, resp) {
         }
       });
       
-    }else{
+    }else if(url_parts.pathname === '/Calca.html'){
+      console.log(new Date().getTime(),' | ',req.headers.host,' | ',req.headers['user-agent']);
       resp.end(HTMLData.hereDoc(HTMLData.index));             
+    }else if(url_parts.pathname === '/'){
+      console.log(new Date().getTime(),' | ',req.headers.host,' | ',req.headers);  
+      resp.end();        
+    }else{
+      resp.end();
     }
 })
 
-server.listen(8080);
+server.listen(80);
