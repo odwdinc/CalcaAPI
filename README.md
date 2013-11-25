@@ -1,14 +1,17 @@
 CalcaAPI
 ========
 tested on OSX 10.9
+
 Provides a AppleScript -> Shell -> node.js -> HTML5 system to work with Calca.
 
 AppleScript:
+========
 	handels to converation to shell access. For a simple read, write interface system for Calca.
 	looks for new Calca window, will use same window for each call.
 	Calca window's shoud stay in background thoull all calls to AppleScript.
 
 Shell:
+========
 	runn apple script with 
 		osascript Calca.scpt (r|w) data
 
@@ -23,7 +26,9 @@ Shell:
     		    => $5/day'
 
 Working with the node.js
-Please Use POST;
+========
+	Please Use POST;
+	
 	POST Format data:
 		m:('r'|'w'),        ;'r' for read curent text, 'w' overites with data string. Bouth return Calca's curent result.
         st:'Data String'    ; not used for read, set cutent text in Calca
