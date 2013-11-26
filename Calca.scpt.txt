@@ -31,22 +31,70 @@ on enabledGUIScripting(flag)
 	end if
 end enabledGUIScripting
 
+on GetDir()
+	set myPath to POSIX path of (path to me as string) -- gets it in "/" form
+	set ASTID to AppleScript's text item delimiters -- save 'em
+	set AppleScript's text item delimiters to "/"
+	set theFolder to (text 1 thru text item -2 of myPath) & "/" as Unicode text
+	set AppleScript's text item delimiters to ASTID -- restore 'em
+	return theFolder
+end GetDir
+
+on stripDirs(theFolder)
+	set ASTID to AppleScript's text item delimiters -- save 'em
+	set AppleScript's text item delimiters to "/"
+	set theFile to (text -2 thru text item -1 of theFolder) as Unicode text
+	set AppleScript's text item delimiters to ASTID -- restore 'em
+	return theFile
+end stripDirs
+
+on stripExt(theWindow)
+	set ASTID to AppleScript's text item delimiters -- save 'em
+	set AppleScript's text item delimiters to "."
+	set wname to (text 1 thru text item -2 of theWindow) as Unicode text
+	set AppleScript's text item delimiters to ASTID -- restore 'em
+	return wname
+end stripExt
+
+on FileExists(theFile) -- (String) as Boolean
+	tell application "System Events"
+		if exists file theFile then
+			return true
+		else
+			return false
+		end if
+	end tell
+end FileExists
+
 
 on run argv
-	if (count of argv) is 2 then
-		return Calca(item 1 of argv, item 2 of argv)
+	set dirr to GetDir()
+	if (count of argv) is 3 then
+		return Calca(item 1 of argv, dirr, item 2 of argv, item 3 of argv)
 	else
-		return "osascript Calca.scpt (r|w) data | " & Calca("r", "")
+		return "osascript Calca.scpt filename (r|w) data | " & Calca("../Sample.txt", dirr, "r", "")
 		
 	end if
 end run
 
+on FileOpen(msg)
+	tell application "Calca"
+		do shell script "open " & msg
+	end tell
+end FileOpen
+
+on NewFile(msg)
+	do shell script "echo Hello >  " & msg
+end NewFile
+
 -- Use this script as a wrapper for GUI Scripting statements when you want the script to run without error on any version of Mac OS X. It presents an alert telling the user that GUI Scripting is not available or, if it is available but not enabled, how to enable it.
 -- For a handler that enables GUI Scripting with minimal user intervention on all recent versions of OS X, use UI Browser's Handler to Enable GUI Scripting. That handler still requires opening System Preferences on OS X Mavericks or newer, where global access can no longer be enabled programmatically.
-on Calca(mode, dat)
+on Calca(filename, dirr, mode, dat)
+	set filename to stripExt(filename) of me
 	set page to ""
 	
-	set windowName to "Untitled"
+	set windowName to stripDirs(filename) of me
+	set windowNameEx to windowName & ".txt"
 	
 	set sysVersion to system attribute "sysv"
 	if sysVersion is greater than or equal to 4144 then -- 4144 is Mac OS X 10.3.0 Panther
@@ -71,16 +119,31 @@ on Calca(mode, dat)
 				tell application process "Calca"
 					
 					-- insert GUI Scripting statements here
-					if window windowName exists then
+					if (window windowName exists) or (window windowNameEx exists) then
 						
 					else
-						click menu item "New" of menu 1 of menu bar item "File" of menu bar 1
+						set msg to dirr & filename & ".txt"
+						if FileExists(msg) of me then
+							FileOpen(msg) of me
+						else
+							NewFile(msg) of me
+							FileOpen(msg) of me
+						end if
+						
+						
 					end if
-					
-					repeat until exists window windowName
+					set cloop to 0
+					repeat until ((exists window windowName) or (window windowNameEx exists))
 						delay 0.2
+						set cloop to cloop + 1
+						if cloop > 5 then
+							return "Cound not Creat/Find Files Named: " & filename
+						end if
 					end repeat
 					
+					if window windowNameEx exists then
+						set windowName to windowNameEx
+					end if
 					if mode is "w" then
 						set value of text area 1 of scroll area 1 of window windowName to dat
 					end if
