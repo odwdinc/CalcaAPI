@@ -47,7 +47,6 @@ var server = http.createServer(function (req, resp) {
 
         if ((data['m'] != undefined) && (data['st'] != undefined) && (data['fn'] != undefined)){
 
-          run_cmd( "osascript", ["./Calca.scpt", data['fn'], data['m'] , data['st']], 
           run_cmd( "sudo", ["-u", "ap","osascript", "./Calca.scpt", data['fn'], data['m'] , data['st']], 
             function(text) { 
               resp.end(text);
