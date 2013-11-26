@@ -27,9 +27,9 @@ module.exports = {
 				        fn:"Sample.txt"
 				    },
 				    function(data,status){
-				    	var start = this.selectionStart;
+				    	var start = textarea.selectionStart;
 				    	$("#tx1").val(data.substring(0, data.length - 1));
-				    	this.selectionStart = this.selectionEnd = start;
+				    	textarea.selectionStart = textarea.selectionEnd = start;
 				    	clstatus('');
 				    	clearInterval(myTimer);
 				    	curentlen = hashCode($("#tx1").val());
@@ -42,14 +42,17 @@ module.exports = {
   					return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);              
 				}
 
-				function syincr() {
+				function syincw(pos) {
 					var len = hashCode(textarea.value);
     				if(curentlen != len){
+    					clstatus('Syincing...');
     					syinc("w");
-    				}else{
-    					syinc("r");
     				}
 					
+				}
+
+				function syincr() {
+    				syinc("r");
 				}
 
 
@@ -65,17 +68,14 @@ module.exports = {
 
 					textarea.onmouseup = textarea.onkeyup = function () {
 						clstatus("...");
+						
 						var pos = getLineNumber();
-    					if (pos != curentline){
-    						var len = textarea.value.length;
-    						//if(curentlen != len){
-    							clstatus('Syincing...');
-    							syinc("w",pos);	
-    						//}
-    						curentline = pos;
-    					}
+    					
+    					syincw(pos);	
+
+    					curentline = pos;
     					clearInterval(myTimer);
-    					myTimer = setInterval(syincr, 2000);
+    					myTimer = setInterval(syincr, 1500);
 					};
 	    	
 					//Adapated form (http://stackoverflow.com/a/6140696/1335566)		
