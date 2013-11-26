@@ -11,9 +11,15 @@ function run_cmd(cmd, args, callBack ) {
 
     child.stdout.on('data', function (buffer) { resp += buffer.toString() });
     child.stdout.on('end', function() { callBack (resp) });
-}
+    child.stderr.on('data', function (data) {
+      console.log('stderr: ' + data);
+    });
 
+    child.stdin.on('data', function (data) {
+      console.log('stdin: ' + data);
+    });
 
+  };
 
 
 
@@ -39,12 +45,11 @@ var server = http.createServer(function (req, resp) {
             data[kdata[0]] = kdata[1].replace(/&nbsp/g," ").replace(/<br\/>/g,"\n");
         });
 
-        if ((data['m'] != undefined) && (data['st'] != undefined) ){
+        if ((data['m'] != undefined) && (data['st'] != undefined) && (data['fn'] != undefined)){
 
-          run_cmd( "osascript", ["./Calca.scpt", data['m'] , data['st']], 
+          run_cmd( "osascript", ["./Calca.scpt", data['fn'], data['m'] , data['st']], 
             function(text) { 
-              resp.write(text);
-              resp.end();
+              resp.end(text);
             });
         }else{
           resp.end(HTMLData.hereDoc(HTMLData.POST));
