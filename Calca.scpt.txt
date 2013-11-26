@@ -72,19 +72,19 @@ on run argv
 	if (count of argv) is 3 then
 		return Calca(item 1 of argv, dirr, item 2 of argv, item 3 of argv)
 	else
-		return "osascript Calca.scpt filename (r|w) data | " & Calca("../Sample.txt", dirr, "r", "")
+		return "osascript Calca.scpt filename (r|w) data | " & Calca("Sample.txt", dirr, "r", "")
 		
 	end if
 end run
 
 on FileOpen(msg)
-	tell application "Calca"
-		do shell script "open " & msg
-	end tell
+	--tell application "Calca"
+	do shell script "open -a /Applications/Calca.app " & msg
+	--end tell
 end FileOpen
 
 on NewFile(msg)
-	do shell script "echo Hello >  " & msg
+	do shell script "touch  " & msg
 end NewFile
 
 -- Use this script as a wrapper for GUI Scripting statements when you want the script to run without error on any version of Mac OS X. It presents an alert telling the user that GUI Scripting is not available or, if it is available but not enabled, how to enable it.

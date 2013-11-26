@@ -24,7 +24,7 @@ module.exports = {
 				    	m:mode,
 				    	st:text.replace(/\n/g, "<br/>").replace(/ /g, "&nbsp"),
 				        ln:pos,
-				        fn:"../Sample.txt"
+				        fn:"Sample.txt"
 				    },
 				    function(data,status){
 				    	var start = this.selectionStart;
