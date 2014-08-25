@@ -2,7 +2,7 @@ var http = require('http');
 var request = require('request');
 var HTMLData = require('./data');
 var url = require('url');
-
+//http://jsfiddle.net/NJs82/
 
 function run_cmd(cmd, args, callBack ) {
     var spawn = require('child_process').spawn;
@@ -25,11 +25,12 @@ function run_cmd(cmd, args, callBack ) {
 
 var server = http.createServer(function (req, resp) {
   var url_parts = url.parse(req.url, true);
-    
-	
+  
+    console.log(req.connection + ": " + req.method + " " + req.url);
 
-    if(url_parts.pathname === '/CalcaAPI.html'){
-      
+    if(url_parts.pathname === '/CalcaAPI'){
+      //console.log(req);  
+      resp.setHeader('Access-Control-Allow-Origin', '*');
       req.content = ''
       req.addListener("data", function(chunk) {
         req.content += chunk;
@@ -57,12 +58,16 @@ var server = http.createServer(function (req, resp) {
       });
       
     }else if(url_parts.pathname === '/Calca.html'){
-      console.log(new Date().getTime(),' | ',req.headers.host,' | ',req.headers['user-agent']);
+      //console.log(new Date().getTime(),' | ',req.headers,' | ',req.headers['user-agent']);
       resp.end(HTMLData.hereDoc(HTMLData.index));             
+    }else if(url_parts.pathname === '/Calca.thtml'){
+      //console.log(new Date().getTime(),' | ',req.headers,' | ',req.headers['user-agent']);
+      resp.end(HTMLData.hereDoc(HTMLData.tabs));             
     }else if(url_parts.pathname === '/'){
-      console.log(new Date().getTime(),' | ',req.headers.host,' | ',req.headers);  
-      resp.end();        
+      //console.log(req,url_parts,'----');
+      resp.end();
     }else{
+      //console.log(req,url_parts);
       resp.end();
     }
 })
